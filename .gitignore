@@ -1,0 +1,13 @@
+env
+
+media
+static
+!**/__pycache__/
+*.pyc
+*.pyo
+/.idea
+/.vs
+.env
+apps/accounts/migrations
+apps/orders/migrations
+apps/products/migrations
