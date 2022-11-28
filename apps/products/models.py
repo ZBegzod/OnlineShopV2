@@ -1,12 +1,10 @@
 from django.db import models
-from django.db import models
 from ckeditor.fields import RichTextField
-
-# Create your models here.
+from django.conf import settings
+# settings.AUTH_USER_MODEL
 
 
 class Category(models.Model):
-
     name = models.CharField(max_length=150)
     image = models.ImageField(upload_to='category/images')
 
@@ -15,7 +13,6 @@ class Category(models.Model):
 
 
 class Collection(models.Model):
-
     title = models.CharField(max_length=120)
 
     def __str__(self):
@@ -23,7 +20,6 @@ class Collection(models.Model):
 
 
 class Color(models.Model):
-
     color = models.CharField(max_length=120)
 
     def __str__(self):
@@ -31,7 +27,6 @@ class Color(models.Model):
 
 
 class Size(models.Model):
-
     size = models.CharField(max_length=120)
 
     def __str__(self):
@@ -49,50 +44,43 @@ class Product(models.Model):
     size = models.ManyToManyField(Size, verbose_name='sizes')
     description = RichTextField(null=True, default='')
     price = models.IntegerField(default=0)
+    image = models.ImageField(upload_to='product/images')
 
-    PRODUCT_ORDER_TYPE = [
+    FILTER_BY_SEX = [
 
-        ('sale', 'Sale'),
-        ('new', 'New'),
-        ('fashion', 'Fashion'),
+        ('male', 'Male'),
+        ('female', 'Female'),
+
     ]
 
-    product_order_type = models.CharField(max_length=150, choices=PRODUCT_ORDER_TYPE)
-    image = models.ImageField(upload_to='product/images')
+    filter_by_sex = models.CharField(max_length=120, choices=FILTER_BY_SEX)
 
     def __str__(self):
         return f'{self.name}'
 
 
 class SaleProduct(models.Model):
-
     product = models.ManyToManyField(Product, related_name='sale_products')
-    images = models.ImageField(upload_to='sale/images')
 
     def __str__(self):
         return f"{self.product}"
 
 
 class FashionProduct(models.Model):
-
     product = models.ManyToManyField(Product, related_name='fashion_products')
-    images = models.ImageField(upload_to='fashion/images')
 
     def __str__(self):
         return f"{self.product}"
 
 
 class NewProduct(models.Model):
-
     product = models.ManyToManyField(Product, related_name='new_products')
-    images = models.ImageField(upload_to='new/images')
 
     def __str__(self):
         return f"{self.product}"
 
 
 class ProductImages(models.Model):
-
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='product_images')
     images = models.ImageField(upload_to='product/images')
 
@@ -100,10 +88,3 @@ class ProductImages(models.Model):
         return f'{self.product}'
 
 
-class Order(models.Model):
-
-    products = models.ForeignKey(Product, null=True, on_delete=models.SET_NULL)
-    count = models.IntegerField(default=1)
-
-    def __str__(self):
-        return f'{self.products}'

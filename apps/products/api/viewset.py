@@ -18,12 +18,27 @@ class CategoryViewSet(mixins.ListModelMixin,
     serializer_class = CategorySerializer
 
 
-class FashionProductViewSet(mixins.ListModelMixin,
-                            mixins.RetrieveModelMixin,
-                            viewsets.GenericViewSet):
+class ProductFilterViewSet(mixins.ListModelMixin,
+                           mixins.RetrieveModelMixin,
+                           viewsets.GenericViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     filterset_class = ProductFilter
+
+
+class ProductFilterBySexViewSet(mixins.ListModelMixin,
+                                mixins.RetrieveModelMixin,
+                                viewsets.GenericViewSet):
+    queryset = Product.objects.all()
+    serializer_class = CategoryProductSerializer
+    filterset_class = ProductSexFilter
+
+
+class FashionProductViewSet(mixins.ListModelMixin,
+                            mixins.RetrieveModelMixin,
+                            viewsets.GenericViewSet):
+    queryset = FashionProduct.objects.all()
+    serializer_class = FashionProductModelSerializer
 
 
 class SaleProductViewSet(mixins.ListModelMixin,
