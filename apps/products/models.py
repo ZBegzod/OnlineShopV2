@@ -43,7 +43,7 @@ class Product(models.Model):
     color = models.ManyToManyField(Color, verbose_name='colors')
     size = models.ManyToManyField(Size, verbose_name='sizes')
     description = RichTextField(null=True, default='')
-    price = models.DecimalField(default=0)
+    price = models.DecimalField(decimal_places=2, max_digits=5, default=0)
     image = models.ImageField(upload_to='product/images')
     product_code = models.CharField(max_length=70)
     available_inventory = models.PositiveIntegerField(default=0)
@@ -55,31 +55,19 @@ class Product(models.Model):
 
     ]
 
-    filter_by_sex = models.CharField(max_length=120, choices=FILTER_BY_SEX)
+    PRODUCT_TYPE = [
+
+        ('fashion', 'Fashion'),
+        ('sale', 'Sale'),
+        ('new', 'New'),
+
+    ]
+
+    filter_by_sex = models.CharField(max_length=80, choices=FILTER_BY_SEX)
+    product_type = models.CharField(max_length=80, choices=PRODUCT_TYPE)
 
     def __str__(self):
         return f'{self.name}'
-
-
-class SaleProduct(models.Model):
-    product = models.ManyToManyField(Product, related_name='sale_products')
-
-    def __str__(self):
-        return f"{self.product}"
-
-
-class FashionProduct(models.Model):
-    product = models.ManyToManyField(Product, related_name='fashion_products')
-
-    def __str__(self):
-        return f"{self.product}"
-
-
-class NewProduct(models.Model):
-    product = models.ManyToManyField(Product, related_name='new_products')
-
-    def __str__(self):
-        return f"{self.product}"
 
 
 class ProductImages(models.Model):
@@ -91,6 +79,7 @@ class ProductImages(models.Model):
 
 
 # Order and Cart Models
+
 class Cart(models.Model):
 
     customer = models.OneToOneField(

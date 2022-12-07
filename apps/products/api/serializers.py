@@ -6,7 +6,7 @@ from apps.accounts.models import CustomUser
 class ProductImagesSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductImages
-        fields = ['images']
+        fields = ['id', 'images']
 
 
 class ProductSerializer(serializers.ModelSerializer):
@@ -40,30 +40,6 @@ class CollectionSerializer(serializers.ModelSerializer):
         fields = ['title', 'collection_products']
 
 
-class FashionProductModelSerializer(serializers.ModelSerializer):
-    product = ProductSerializer(many=True)
-
-    class Meta:
-        model = FashionProduct
-        fields = '__all__'
-
-
-class NewProductModelSerializer(serializers.ModelSerializer):
-    product = ProductSerializer(many=True)
-
-    class Meta:
-        model = NewProduct
-        fields = '__all__'
-
-
-class SaleProductModelSerializer(serializers.ModelSerializer):
-    product = ProductSerializer(many=True)
-
-    class Meta:
-        model = SaleProduct
-        fields = '__all__'
-
-
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
@@ -71,6 +47,8 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class CartItemSerializer(serializers.ModelSerializer):
+    product = ProductSerializer(many=True)
+
     class Meta:
         model = CartItem
         fields = (

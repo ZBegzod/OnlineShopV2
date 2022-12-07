@@ -15,7 +15,6 @@ from rest_framework.permissions import (
 from rest_framework.generics import (
     CreateAPIView,
     ListAPIView,
-    RetrieveDestroyAPIView,
 )
 from rest_framework.decorators import (
                                        api_view,
@@ -39,9 +38,9 @@ class CategoryViewSet(mixins.ListModelMixin,
     permission_classes = [IsAuthenticatedOrReadOnly]
 
 
-class ProductFilterViewSet(mixins.ListModelMixin,
-                           mixins.RetrieveModelMixin,
-                           viewsets.GenericViewSet):
+class ProductViewSet(mixins.ListModelMixin,
+                     mixins.RetrieveModelMixin,
+                     viewsets.GenericViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     filterset_class = ProductFilter
@@ -51,25 +50,35 @@ class ProductFilterViewSet(mixins.ListModelMixin,
 class FashionProductViewSet(mixins.ListModelMixin,
                             mixins.RetrieveModelMixin,
                             viewsets.GenericViewSet):
-    queryset = FashionProduct.objects.all()
-    serializer_class = FashionProductModelSerializer
+
+    serializer_class = ProductSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
+
+    def get_queryset(self):
+        queryset = Product.objects.filter(product_type='fashion')
+        return queryset
 
 
 class SaleProductViewSet(mixins.ListModelMixin,
                          mixins.RetrieveModelMixin,
                          viewsets.GenericViewSet):
-    queryset = SaleProduct.objects.all()
-    serializer_class = SaleProductModelSerializer
+    serializer_class = ProductSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
+
+    def get_queryset(self):
+        queryset = Product.objects.filter(product_type='sale')
+        return queryset
 
 
 class NewProductViewSet(mixins.ListModelMixin,
                         mixins.RetrieveModelMixin,
                         viewsets.GenericViewSet):
-    queryset = NewProduct.objects.all()
-    serializer_class = NewProductModelSerializer
+    serializer_class = ProductSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
+
+    def get_queryset(self):
+        queryset = Product.objects.filter(product_type='new')
+        return queryset
 
 
 class CartListApiView(ListAPIView):
