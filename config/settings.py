@@ -36,12 +36,10 @@ ALLOWED_HOSTS = ['*']
 APPS = [
     'apps.products',
     'apps.accounts',
-    'apps.orders',
     'ckeditor',
     'drf_yasg',
     'rest_framework',
     'django_filters',
-    'corsheaders',
     'rest_framework_simplejwt',
 ]
 

@@ -12,6 +12,7 @@ from django.urls import reverse
 from .permissions import IsOwnerOrReadOnly
 from apps.accounts.models import *
 from .utils import Util
+from rest_framework_simplejwt.tokens import RefreshToken
 from .serializers import RegistrationModelSerializer,\
     LoginSerializer, ResetPasswordEmailRequestSerializer,\
     SetNewPasswordSerializer, RetrieveModelSerializer
@@ -22,13 +23,15 @@ class CustomUserCreate(GenericAPIView):
     serializer_class = RegistrationModelSerializer
 
     def post(self, request):
-        register_serializer = self.serializer_class(data=request.data)
-        register_serializer.is_valid()
-        new_user = register_serializer.save()
-
-        if new_user:
-            return Response(status=status.HTTP_201_CREATED)
-        return Response(register_serializer.errors, status=status.HTTP_404_NOT_FOUND)
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid()
+        serializer.save()
+        user_data = serializer.data
+        user = CustomUser.objects.get(username=user_data.get('username'))
+        token = RefreshToken.for_user(user)
+        if user:
+            return Response(str(token.access_token), status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_404_NOT_FOUND)
 
 
 class UserPersonalData(RetrieveUpdateAPIView):
@@ -48,8 +51,14 @@ class LoginView(GenericAPIView):
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data['user']
         login(request, user)
+        refresh = RefreshToken.for_user(user)
 
-        return Response(None, status=status.HTTP_202_ACCEPTED)
+        data = {
+            'refresh': str(refresh),
+            'access': str(refresh.access_token)
+        }
+
+        return Response(data, status=status.HTTP_202_ACCEPTED)
 
 
 class RequestPasswordResetEmail(GenericAPIView):

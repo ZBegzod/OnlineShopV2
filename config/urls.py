@@ -52,11 +52,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
 
     # apps api
-    path('api/', include('apps.products.api.urls')),
-    path('accounts/', include('apps.accounts.api.urls')),
+    path('products-api/', include('apps.products.api.urls')),
+    path('accounts-api/', include('apps.accounts.api.urls')),
 
     ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT) \
     + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-
-# path('', include('apps.accounts')),
-# path('orders', include('apps.orders')),
