@@ -103,7 +103,7 @@ class Cart(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     @property
-    def calculate_total_discount(self):
+    def calculated_total_discount(self):
         cart_items = self.items.all()
         total_discount = sum([item.calculate_discount for item in cart_items])
         return total_discount

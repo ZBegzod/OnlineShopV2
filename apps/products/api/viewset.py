@@ -114,7 +114,7 @@ class CartCreateApiView(CreateAPIView):
 
 @api_view(['GET'])
 @login_required(login_url='accounts-api/login/')
-@permission_classes([IsOwner])
+@permission_classes([IsOwner, IsAuthenticated])
 def my_cart_view(request):
     categories = Category.objects.all()
     cart, cart = Cart.objects.get_or_create(customer=request.user)

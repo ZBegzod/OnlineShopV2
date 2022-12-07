@@ -70,51 +70,27 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ['username']
 
 
-class MyCartItemSerializer(serializers.ModelSerializer):
-    product = ProductSerializer()
-
-    class Meta:
-        model = CartItem
-        fields = (
-            "product",
-            "quantity",
-            "get_total_price"
-        )
-
-
-class MyCartSerializer(serializers.ModelSerializer):
-    items = MyCartItemSerializer(many=True)
-    customer = UserSerializer(required=False, read_only=True)
-
-    class Meta:
-        model = Cart
-        fields = (
-            "customer"
-            "created_at",
-            "updated_at",
-            "get_cart_total_count",
-            "get_cart_total_price",
-            "items"
-        )
-
-
 class CartItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = CartItem
         fields = (
-            'id', 'product', 'quantity', 'get_total_price'
+            'id',
+            'product',
+            'quantity',
+            'get_total_price'
         )
 
 
 class CartSerializer(serializers.ModelSerializer):
     items = CartItemSerializer(many=True)
+    customer = UserSerializer(required=False, read_only=True)
 
     class Meta:
         model = Cart
         fields = (
             'created_at', 'updated_at', 'items',
             'get_cart_total_count', 'get_cart_total_price',
-            'calculate_total_discount'
+            'calculated_total_discount', "customer"
         )
 
 
