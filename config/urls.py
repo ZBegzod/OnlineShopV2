@@ -39,6 +39,7 @@ schema_view = get_schema_view(
 
 )
 
+
 urlpatterns = [
 
     # swagger

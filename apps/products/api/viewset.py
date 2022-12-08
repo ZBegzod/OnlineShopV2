@@ -1,11 +1,10 @@
-from django.contrib.auth.decorators import login_required
 from rest_framework import viewsets, mixins
 from apps.products.api.serializers import *
 from apps.products.api.filters import *
 from rest_framework import status
 from rest_framework.response import Response
 from django.http import JsonResponse
-from .permissions import IsOwner
+from .permissions import *
 from rest_framework.exceptions import (
     NotAcceptable
 )
@@ -15,6 +14,7 @@ from rest_framework.permissions import (
 from rest_framework.generics import (
     CreateAPIView,
     ListAPIView,
+    RetrieveAPIView,
 )
 from rest_framework.decorators import (
                                        api_view,
@@ -83,7 +83,7 @@ class NewProductViewSet(mixins.ListModelMixin,
 
 class CartListApiView(ListAPIView):
     serializer_class = CartSerializer
-    permission_classes = [IsOwner, IsAuthenticated]
+    permission_classes = [IsOwnerCart, IsAuthenticated]
 
     def get_queryset(self):
         user = self.request.user
@@ -91,54 +91,56 @@ class CartListApiView(ListAPIView):
         return queryset
 
 
-class CartCreateApiView(CreateAPIView):
+class CartItemDetailApiView(RetrieveAPIView):
+    permission_classes = [IsOwnerCartItem, IsAuthenticated]
     queryset = CartItem.objects.all()
-    serializer_class = None
-    permission_classes = [IsOwner, IsAuthenticated]
-
-    def post(self, request, *args, **kwargs):
-
-        user = request.user
-        product_id = request.data.get('product_id')
-        product = Product.objects.filter(id=product_id).first()
-        my_cart, new_cart = Cart.objects.get_or_create(customer=user)
-
-        data = None
-        if my_cart:
-            CartItem.objects.create(product=product, cart=my_cart)
-            data = {
-                'success': True,
-                'product': product.name,
-            }
-
-        if new_cart:
-            CartItem.objects.create(product=product, cart=new_cart)
-            data = {
-                'success': True,
-                'product': product.name
-            }
-
-        return JsonResponse(data, status=201)
-
-
-@api_view(['GET'])
-@login_required(login_url='accounts-api/login/')
-@permission_classes([IsOwner, IsAuthenticated])
-def my_cart_view(request):
-    categories = Category.objects.all()
-    cart, cart = Cart.objects.get_or_create(customer=request.user)
-    data = {
-        'categories': categories,
-        'cart': cart
-    }
-    return JsonResponse(data, status=200)
+    serializer_class = CartItemSerializer
+    lookup_field = 'pk'
 
 
 @api_view(['POST'])
-@permission_classes([IsOwner, IsAuthenticated])
-def plus_quantity(request):
-    cart_item_id = request.GET.get('cart_item_id')
+@permission_classes([IsAuthenticated])
+def cart_create(request):
 
+    user = request.user
+    product_id = request.data.get('product_id')
+    product = Product.objects.filter(id=product_id).first()
+    my_cart, new_cart = Cart.objects.get_or_create(customer=user)
+
+    data = None
+    if my_cart:
+        CartItem.objects.create(product=product, cart=my_cart)
+        data = {
+            'success': True,
+            'product': product.name,
+        }
+
+    if new_cart:
+        CartItem.objects.create(product=product, cart=new_cart)
+        data = {
+            'success': True,
+            'product': product.name
+        }
+
+    return JsonResponse(data, status=201)
+
+
+# @api_view(['GET'])
+# @permission_classes([IsAuthenticated])
+# def my_cart_view(request):
+#     categories = Category.objects.all()
+#     cart, cart = Cart.objects.get_or_create(customer=request.user)
+#     data = {
+#         'categories': categories,
+#         'cart': cart
+#     }
+#     return Response(data, status=200)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def plus_quantity(request):
+    cart_item_id = request.data.get('cart_item_id')
     cart_item = CartItem.objects.get(id=cart_item_id)
     if cart_item.product.available_inventory < cart_item.quantity:
         raise NotAcceptable('We do not have enough inventory of ' + str(cart_item.product.title) +
@@ -148,15 +150,15 @@ def plus_quantity(request):
     cart_item.product.save()
     cart_item.save()
 
-    data = {'success': True, 'message': 'cart item incremented by one', 'cart_item': cart_item.get_total}
+    data = {'success': True, 'message': 'cart item incremented by one', 'price': cart_item.get_total_price}
     return JsonResponse(data, status=200)
 
 
 @api_view(['POST'])
-@permission_classes([IsOwner, IsAuthenticated])
+@permission_classes([IsAuthenticated])
 def minus_quantity(request):
-    cart_id = request.GET.get('cart_id')
-    cart_item = CartItem.objects.get(id=cart_id)
+    cart_item_id = request.data.get('cart_item_id')
+    cart_item = CartItem.objects.get(id=cart_item_id)
 
     if cart_item.quantity > 1:
         cart_item.quantity -= 1
@@ -165,23 +167,24 @@ def minus_quantity(request):
         cart_item.save()
         data = {
             'success': True,
-            'message': 'cart item decremented by one'
+            'message': 'cart item decremented by one',
+            'price': cart_item.get_total_price,
         }
     else:
         cart_item.delete()
         data = {
             'success': True,
             'deleted': True,
-            'message': 'cart item was deleted'
+            'message': 'cart item was deleted',
         }
     return JsonResponse(data, status=200)
 
 
 @api_view(['POST'])
-@permission_classes([IsOwner, IsAuthenticated])
+@permission_classes([IsAuthenticated])
 def delete_cart_item_view(request):
-    cart_id = request.GET.get('cart_id')
-    cart_item = CartItem.objects.get(id=cart_id)
+    cart_item_id = request.data.get('cart_item_id')
+    cart_item = CartItem.objects.get(id=cart_item_id)
     cart_item.product.available_inventory += cart_item.quantity
     cart_item.product.save()
     cart_item.delete()
@@ -197,7 +200,7 @@ def delete_cart_item_view(request):
 class OrderListApiView(ListAPIView):
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
-    permission_classes = [IsOwner, IsAuthenticated]
+    permission_classes = [IsOwnerOrder, IsAuthenticated]
 
     def get_queryset(self):
         user = self.request.user
@@ -218,5 +221,4 @@ class OrderCreateAPIView(CreateAPIView):
         serializer.save(customer_id=request.user.id, cart_id=cart.id)
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
-
 

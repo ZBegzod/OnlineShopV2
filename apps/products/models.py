@@ -94,7 +94,7 @@ class Cart(models.Model):
     @property
     def calculated_total_discount(self):
         cart_items = self.items.all()
-        total_discount = sum([item.calculate_discount for item in cart_items])
+        total_discount = sum([item.calculate_discount is not None for item in cart_items])
         return total_discount
 
     @property
@@ -138,8 +138,10 @@ class CartItem(models.Model):
 
     @property
     def calculate_discount(self):
-        discount = (self.discount * self.product.price)
-        return discount
+        if self.discount:
+            discount = (self.discount * self.product.price)
+            return discount
+        return None
 
     def __str__(self):
         return f"{self.product.name}"

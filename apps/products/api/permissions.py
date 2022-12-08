@@ -1,11 +1,22 @@
 from rest_framework import permissions
 
 
-class IsOwner(permissions.BasePermission):
+class IsOwnerCart(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
 
-        # if request.method in permissions.SAFE_METHODS:
-        #     return True
+        return obj.customer == request.user
 
-        return obj.owner == request.user
+
+class IsOwnerCartItem(permissions.BasePermission):
+
+    def has_object_permission(self, request, view, obj):
+
+        return obj.cart.customer == request.user
+
+
+class IsOwnerOrder(permissions.BasePermission):
+
+    def has_object_permission(self, request, view, obj):
+
+        return obj.customer == request.user

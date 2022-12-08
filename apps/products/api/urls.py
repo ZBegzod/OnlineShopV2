@@ -17,11 +17,13 @@ urlpatterns += [
 
     # cart
     path('cart', CartListApiView.as_view(), name='cart'),
-    path('cart-create', CartCreateApiView.as_view(), name='cart-create'),
-    path('cart-by-category', my_cart_view, name='cart-by-category'),
+    path('cart-item-detail/<int:pk>', CartItemDetailApiView.as_view(), name='cart-item-detail'),
+    path('cart-create', cart_create, name='cart-create'),
+    # path('cart-category', my_cart_view, name='cart-by-category'),
     path('plus-quantity', plus_quantity, name='plus-quantity'),
     path('minus-quantity', minus_quantity, name='minus-quantity'),
     path('cart-delete', delete_cart_item_view, name='cart-delete'),
+
 
     # order
     path("order/", OrderListApiView.as_view(), name='order'),

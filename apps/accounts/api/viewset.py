@@ -13,9 +13,11 @@ from .permissions import IsOwnerOrReadOnly
 from apps.accounts.models import *
 from .utils import Util
 from rest_framework_simplejwt.tokens import RefreshToken
-from .serializers import RegistrationModelSerializer,\
-    LoginSerializer, ResetPasswordEmailRequestSerializer,\
+from .serializers import (
+    RegistrationModelSerializer,
+    LoginSerializer, ResetPasswordEmailRequestSerializer,
     SetNewPasswordSerializer, RetrieveModelSerializer
+)
 
 
 class CustomUserCreate(GenericAPIView):
@@ -67,8 +69,8 @@ class RequestPasswordResetEmail(GenericAPIView):
     def post(self, request):
 
         serializer = self.serializer_class(data=request.data)
-        email = request.data['email']
-
+        email = self.request.data['email']
+        print(email)
         if CustomUser.objects.filter(email=email).exists():
             user = CustomUser.objects.get(email=email)
             uidb64 = urlsafe_base64_encode(smart_bytes(user.id))
@@ -81,6 +83,7 @@ class RequestPasswordResetEmail(GenericAPIView):
                 'email_body': email_body, 'to_email': user.email,
                 'email_subject': 'Reset your password'
             }
+            print(data)
             Util.send_email(data)
 
         return Response({'success': 'We have sent you link to reset your password'}, status=status.HTTP_200_OK)

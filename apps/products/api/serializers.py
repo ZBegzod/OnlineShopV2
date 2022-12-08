@@ -14,14 +14,17 @@ class ProductSerializer(serializers.ModelSerializer):
     size = serializers.StringRelatedField(many=True)
     product_images = ProductImagesSerializer(many=True, read_only=True)
 
-    # category = serializers.StringRelatedField(read_only=True)
+    category = serializers.StringRelatedField(read_only=True)
+    collection = serializers.StringRelatedField(read_only=True)
 
     class Meta:
         model = Product
-        fields = ['id', 'name', 'model', 'made_of_type',
-                  'color', 'size', 'description',
-                  'price', 'image', 'product_images',
-                  'category', 'collection']
+        fields = ['id', 'collection', 'category',
+                  'name', 'model', 'made_of_type',
+                  'color', 'size', 'price', 'image',
+                  'product_images', 'available_inventory',
+                  'description'
+                  ]
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -47,7 +50,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class CartItemSerializer(serializers.ModelSerializer):
-    product = ProductSerializer(many=True)
+    product = serializers.StringRelatedField(required=False)
 
     class Meta:
         model = CartItem
@@ -87,4 +90,3 @@ class OrderSerializer(serializers.ModelSerializer):
             'cart': {"required": False},
             'customer': {"required": False},
         }
-
